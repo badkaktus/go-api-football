@@ -86,3 +86,49 @@ func TestGetVenues(t *testing.T) {
 	assert.Nil(t, err, "expecting nil error")
 	assert.NotNil(t, res, "expecting non-nil result")
 }
+
+func TestGetFixtures(t *testing.T) {
+	c := NewClient("96e0b4dc42ebd235bec1aed0d937db20")
+
+	ctx := context.Background()
+
+	param := FixturesOptions{
+		Team:   5470,
+		Season: 2022,
+	}
+
+	res, err := c.GetFixtures(ctx, &param)
+
+	assert.Nil(t, err, "expecting nil error")
+	assert.NotNil(t, res, "expecting non-nil result")
+}
+
+func TestGetHead2Head(t *testing.T) {
+	c := NewClient("96e0b4dc42ebd235bec1aed0d937db20")
+
+	ctx := context.Background()
+
+	param := Head2HeadOptions{
+		H2h: "1994-597",
+	}
+
+	res, err := c.GetHead2Head(ctx, &param)
+
+	assert.Nil(t, err, "expecting nil error")
+	assert.NotNil(t, res, "expecting non-nil result")
+}
+
+func TestGetFixturesStatistics(t *testing.T) {
+	c := NewClient("96e0b4dc42ebd235bec1aed0d937db20")
+
+	ctx := context.Background()
+
+	param := FixturesStatisticsOptions{
+		Fixture: 711454,
+	}
+
+	res, err := c.GetFixturesStatistics(ctx, &param)
+
+	assert.Nil(t, err, "expecting nil error")
+	assert.NotNil(t, res, "expecting non-nil result")
+}
