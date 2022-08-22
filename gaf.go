@@ -54,18 +54,9 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		Response: v,
 	}
 
-	// bodyBytes, err := io.ReadAll(res.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// bodyString := string(bodyBytes)
-	// log.Println(bodyString)
-
 	if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
 		return err
 	}
-
-	// fmt.Println(fullResponse)
 
 	return nil
 }
