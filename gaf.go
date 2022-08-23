@@ -2,14 +2,15 @@ package gaf
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 )
 
 const (
-	BaseURLV3 = "https://v3.football.api-sports.io"
+	Protocol     = "https"
+	BaseDomainV3 = "v3.football.api-sports.io"
 )
 
 type Client struct {
@@ -20,7 +21,7 @@ type Client struct {
 
 func NewClient(apiKey string) *Client {
 	return &Client{
-		BaseURL: BaseURLV3,
+		BaseURL: fmt.Sprintf("%s://%s", Protocol, BaseDomainV3),
 		apiKey:  apiKey,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
@@ -31,7 +32,7 @@ func NewClient(apiKey string) *Client {
 func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
-	req.Header.Set("x-rapidapi-host", "v3.football.api-sports.io")
+	req.Header.Set("x-rapidapi-host", BaseDomainV3)
 	req.Header.Set("x-rapidapi-key", c.apiKey)
 
 	res, err := c.HTTPClient.Do(req)
@@ -42,13 +43,19 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 	defer res.Body.Close()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		var errRes errorResponse
-		if err = json.NewDecoder(res.Body).Decode(&errRes); err == nil {
-			return errors.New(errRes.Message)
-		}
-
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
+
+	// if err = json.NewDecoder(resBodyForErrorCheck).Decode(&errRes); err == nil {
+	// 	fmt.Printf("first: %+v\n", errRes)
+	// 	if errRes.Errors.Token != "" {
+	// 		fmt.Printf("second\n")
+	// 		return fmt.Errorf("%s", errRes.Errors.Token)
+	// 	}
+	// 	fmt.Printf("third\n")
+	// 	return fmt.Errorf("unknown error API error")
+	// }
+	// fmt.Printf("fourth %+v\n", errRes)
 
 	fullResponse := successResponse{
 		Response: v,
@@ -56,6 +63,20 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 
 	if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
 		return err
+	}
+
+	if reflect.TypeOf(fullResponse.Errors).Kind().String() == "map" {
+		iter := reflect.ValueOf(fullResponse.Errors).MapRange()
+		errorMap := make(map[string]string)
+		for iter.Next() {
+			errorMap[iter.Key().String()] = fmt.Sprintf("%s", iter.Value())
+		}
+
+		if v, found := errorMap["token"]; found {
+			return fmt.Errorf(v)
+		}
+
+		return fmt.Errorf("unknown error API error")
 	}
 
 	return nil
