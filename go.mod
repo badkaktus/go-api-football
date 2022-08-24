@@ -1,4 +1,4 @@
-module gaf
+module github.com/badkaktus/go-api-football
 
 go 1.19
 
