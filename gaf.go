@@ -46,17 +46,6 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
 
-	// if err = json.NewDecoder(resBodyForErrorCheck).Decode(&errRes); err == nil {
-	// 	fmt.Printf("first: %+v\n", errRes)
-	// 	if errRes.Errors.Token != "" {
-	// 		fmt.Printf("second\n")
-	// 		return fmt.Errorf("%s", errRes.Errors.Token)
-	// 	}
-	// 	fmt.Printf("third\n")
-	// 	return fmt.Errorf("unknown error API error")
-	// }
-	// fmt.Printf("fourth %+v\n", errRes)
-
 	fullResponse := successResponse{
 		Response: v,
 	}
