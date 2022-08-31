@@ -14,27 +14,9 @@ type TransfersOptions struct {
 }
 
 type Transfers []struct {
-	Player struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-	} `json:"player"`
-	Update    time.Time `json:"update"`
-	Transfers []struct {
-		Date  string `json:"date"`
-		Type  string `json:"type"`
-		Teams struct {
-			In struct {
-				ID   int    `json:"id"`
-				Name string `json:"name"`
-				Logo string `json:"logo"`
-			} `json:"in"`
-			Out struct {
-				ID   int    `json:"id"`
-				Name string `json:"name"`
-				Logo string `json:"logo"`
-			} `json:"out"`
-		} `json:"teams"`
-	} `json:"transfers"`
+	Player    Player     `json:"player"`
+	Update    time.Time  `json:"update"`
+	Transfers []Transfer `json:"transfers"`
 }
 
 func (c *Client) GetTranfers(ctx context.Context, options *TransfersOptions) (*Transfers, error) {

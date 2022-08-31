@@ -5,7 +5,6 @@ package gaf
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
@@ -40,7 +39,6 @@ func TestGetTeamSeasons(t *testing.T) {
 	assert.Nil(t, err, "expecting nil error")
 	assert.NotNil(t, res, "expecting non-nil result")
 }
-
 func TestGetTeamStatistics(t *testing.T) {
 	c := NewClient(os.Getenv("API_KEY"))
 

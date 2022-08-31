@@ -15,45 +15,12 @@ type OddsLiveOptions struct {
 }
 
 type OddsLive []struct {
-	Fixture struct {
-		ID     int `json:"id"`
-		Status struct {
-			Long    string `json:"long"`
-			Elapsed int    `json:"elapsed"`
-			Seconds string `json:"seconds"`
-		} `json:"status"`
-	} `json:"fixture"`
-	League struct {
-		ID     int `json:"id"`
-		Season int `json:"season"`
-	} `json:"league"`
-	Teams struct {
-		Home struct {
-			ID    int `json:"id"`
-			Goals int `json:"goals"`
-		} `json:"home"`
-		Away struct {
-			ID    int `json:"id"`
-			Goals int `json:"goals"`
-		} `json:"away"`
-	} `json:"teams"`
-	Status struct {
-		Stopped  bool `json:"stopped"`
-		Blocked  bool `json:"blocked"`
-		Finished bool `json:"finished"`
-	} `json:"status"`
-	Update time.Time `json:"update"`
-	Odds   []struct {
-		ID     int    `json:"id"`
-		Name   string `json:"name"`
-		Values []struct {
-			Value     string      `json:"value"`
-			Odd       string      `json:"odd"`
-			Handicap  string      `json:"handicap"`
-			Main      interface{} `json:"main"`
-			Suspended bool        `json:"suspended"`
-		} `json:"values"`
-	} `json:"odds"`
+	Fixture FixtureOddsLive `json:"fixture"`
+	League  LeagueOddsLive  `json:"league"`
+	Teams   TeamsOdds       `json:"teams"`
+	Status  OddsStatus      `json:"status"`
+	Update  time.Time       `json:"update"`
+	Odds    []Odd           `json:"odds"`
 }
 
 func (c *Client) GetOddsLive(ctx context.Context, options *OddsLiveOptions) (*OddsLive, error) {

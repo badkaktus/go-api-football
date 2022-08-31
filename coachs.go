@@ -14,34 +14,18 @@ type CoachsOptions struct {
 }
 
 type Coachs []struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Age       int    `json:"age"`
-	Birth     struct {
-		Date    string `json:"date"`
-		Place   string `json:"place"`
-		Country string `json:"country"`
-	} `json:"birth"`
-	Nationality string `json:"nationality"`
-	Height      string `json:"height"`
-	Weight      string `json:"weight"`
-	Photo       string `json:"photo"`
-	Team        struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-		Logo string `json:"logo"`
-	} `json:"team"`
-	Career []struct {
-		Team struct {
-			ID   int    `json:"id"`
-			Name string `json:"name"`
-			Logo string `json:"logo"`
-		} `json:"team"`
-		Start string      `json:"start"`
-		End   interface{} `json:"end"`
-	} `json:"career"`
+	ID          int           `json:"id"`
+	Name        string        `json:"name"`
+	Firstname   string        `json:"firstname"`
+	Lastname    string        `json:"lastname"`
+	Age         int           `json:"age"`
+	Birth       Birth         `json:"birth"`
+	Nationality string        `json:"nationality"`
+	Height      string        `json:"height"`
+	Weight      string        `json:"weight"`
+	Photo       string        `json:"photo"`
+	Team        TeamShortInfo `json:"team"`
+	Career      []CareerRow   `json:"career"`
 }
 
 func (c *Client) GetCoachs(ctx context.Context, options *CoachsOptions) (*Coachs, error) {

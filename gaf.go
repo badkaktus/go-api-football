@@ -61,11 +61,15 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 			errorMap[iter.Key().String()] = fmt.Sprintf("%s", iter.Value())
 		}
 
-		if v, found := errorMap["token"]; found {
-			return fmt.Errorf(v)
+		if len(errorMap) > 0 {
+			var errTxt string
+			for field, errorMsg := range errorMap {
+				errTxt = fmt.Sprintf("%s: %s. ", field, errorMsg)
+			}
+			return fmt.Errorf(fmt.Sprintf("API error(-s): %s", errTxt))
 		}
 
-		return fmt.Errorf("unknown error API error")
+		return fmt.Errorf("unknown API error")
 	}
 
 	return nil
