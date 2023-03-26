@@ -249,3 +249,14 @@ func TestGetOddsLive(t *testing.T) {
 	assert.Nil(t, err, "expecting nil error")
 	assert.NotNil(t, res, "expecting non-nil result")
 }
+
+func TestStatus(t *testing.T) {
+	c := NewClient(os.Getenv("API_KEY"))
+
+	ctx := context.Background()
+
+	res, err := c.GetStatus(ctx)
+
+	assert.Nil(t, err, "expecting nil error")
+	assert.NotNil(t, res, "expecting non-nil result")
+}
