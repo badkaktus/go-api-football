@@ -310,17 +310,17 @@ type Percent struct {
 }
 
 type Prediction struct {
-	Winner    WinnerTeam `json:"winner"`
-	WinOrDraw bool       `json:"win_or_draw"`
-	UnderOver string     `json:"under_over"`
-	Goals     Goals      `json:"goals"`
-	Advice    string     `json:"advice"`
-	Percent   Percent    `json:"percent"`
+	Winner    WinnerTeam     `json:"winner"`
+	WinOrDraw bool           `json:"win_or_draw"`
+	UnderOver string         `json:"under_over"`
+	Goals     HomeAwayString `json:"goals"`
+	Advice    string         `json:"advice"`
+	Percent   Percent        `json:"percent"`
 }
 
 type GoalsTotalAvg struct {
-	Total   int    `json:"total"`
-	Average string `json:"average"`
+	Total   int     `json:"total"`
+	Average float32 `json:"average"`
 }
 
 type GoalsForAgainstTotalAvg struct {

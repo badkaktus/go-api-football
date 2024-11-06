@@ -50,6 +50,31 @@ Not all endpoints have been added to the client at the moment.
 | Fixtures players statistics | `/fixtures/players`    | GetFixturesPlayers    | FixturesPlayersOptions         |
 | Predictions                 | `/predictions`         | GetPredictions        | PredictionsOptions             |
 | Coachs                      | `/coachs`              | GetCoachs             | CoachsOptions                  |
-| Transfers                   | `/transfers`           | GetTranfers           | TransfersOptions               |
+| Transfers                   | `/transfers`           | GetTransfers          | TransfersOptions               |
 | Sidelined                   | `/sidelined`           | GetSidelined          | SidelinedOptions               |
 | Odds (In-Play)              | `/odds/live`           | GetOddsLive           | OddsLiveOptions                |
+
+
+### TODO
+- /timezone
+- /countries
+- /leagues
+- /leagues/seasons
+- /teams/countries
+- /fixtures/rounds
+- /injuries
+- /players/seasons
+- /players/profiles
+- /players
+- /players/squads
+- /players/teams
+- /players/topscorers
+- /players/topassists
+- /players/topyellowcards
+- /players/topredcards
+- /trophies
+- /odds/live/bets
+- /odds
+- /odds/mapping
+- /odds/bookmakers
+- /odds/bets

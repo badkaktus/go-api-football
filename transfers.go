@@ -19,7 +19,7 @@ type Transfers []struct {
 	Transfers []Transfer `json:"transfers"`
 }
 
-func (c *Client) GetTranfers(ctx context.Context, options *TransfersOptions) (*Transfers, error) {
+func (c *Client) GetTransfers(ctx context.Context, options *TransfersOptions) (*Transfers, error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
