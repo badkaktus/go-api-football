@@ -28,12 +28,12 @@ jobs:
       - name: Run Tests
         run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.txt
-          flags: unittests
-          fail_ci_if_error: true
+#      - name: Upload coverage reports
+#        uses: codecov/codecov-action@v3
+#        with:
+#          file: ./coverage.txt
+#          flags: unittests
+#          fail_ci_if_error: true
 
       - name: Check test coverage
         run: |
