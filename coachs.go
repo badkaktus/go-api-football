@@ -28,7 +28,7 @@ type Coachs []struct {
 	Career      []CareerRow   `json:"career"`
 }
 
-func (c *Client) GetCoachs(ctx context.Context, options *CoachsOptions) (*Coachs, error) {
+func (c *Client) GetCoachs(ctx context.Context, options *CoachsOptions) (*APIResponse[Coachs], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (c *Client) GetCoachs(ctx context.Context, options *CoachsOptions) (*Coachs
 
 	req = req.WithContext(ctx)
 
-	res := Coachs{}
+	var res APIResponse[Coachs]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

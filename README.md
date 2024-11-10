@@ -37,6 +37,7 @@ Not all endpoints have been added to the client at the moment.
 | Endpoints                   | Route                  | Method                | Struct with options for method |
 |-----------------------------|------------------------|-----------------------|--------------------------------|
 | Status                      | `/status`              | GetStatus             | -                              |
+| Timezone                    | `/timezone`            | GetTimezone           | -                              |
 | Teams information           | `/teams`               | GetTeams              | TeamsOptions                   |
 | Teams statistics            | `/teams/statistics`    | GetTeamStatistics     | TeamStatisticsOption           |
 | Teams seasons               | `/teams/seasons`       | GetTeamSeasons        | TeamSeasonsOptions             |
@@ -56,7 +57,6 @@ Not all endpoints have been added to the client at the moment.
 
 
 ### TODO
-- /timezone
 - /countries
 - /leagues
 - /leagues/seasons

@@ -49,7 +49,7 @@ type TeamStatistics struct {
 	Cards         Cards                 `json:"cards"`
 }
 
-func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions) (*Teams, error) {
+func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions) (*APIResponse[Teams], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions) (*Teams, e
 
 	req = req.WithContext(ctx)
 
-	res := Teams{}
+	var res APIResponse[Teams]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions) (*Teams, e
 	return &res, nil
 }
 
-func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions) (*[]int, error) {
+func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions) (*APIResponse[[]int], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions
 
 	req = req.WithContext(ctx)
 
-	res := []int{}
+	var res APIResponse[[]int]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions
 	return &res, nil
 }
 
-func (c *Client) GetTeamStatistics(ctx context.Context, options *TeamStatisticsOption) (*TeamStatistics, error) {
+func (c *Client) GetTeamStatistics(ctx context.Context, options *TeamStatisticsOption) (*APIResponse[TeamStatistics], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (c *Client) GetTeamStatistics(ctx context.Context, options *TeamStatisticsO
 
 	req = req.WithContext(ctx)
 
-	res := TeamStatistics{}
+	var res APIResponse[TeamStatistics]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

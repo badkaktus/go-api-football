@@ -26,7 +26,7 @@ type Venues []struct {
 	Image    string `json:"image"`
 }
 
-func (c *Client) GetVenues(ctx context.Context, options *VenuesOptions) (*Venues, error) {
+func (c *Client) GetVenues(ctx context.Context, options *VenuesOptions) (*APIResponse[Venues], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (c *Client) GetVenues(ctx context.Context, options *VenuesOptions) (*Venues
 
 	req = req.WithContext(ctx)
 
-	res := Venues{}
+	var res APIResponse[Venues]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

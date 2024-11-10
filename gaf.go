@@ -3,8 +3,8 @@ package gaf
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"reflect"
 	"time"
 )
 
@@ -40,37 +40,44 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(res.Body)
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
 
-	fullResponse := successResponse{
-		Response: v,
-	}
+	//fullResponse := successResponse{
+	//	Response: v,
+	//}
 
-	if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
+	//fullResponse := v
+
+	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
 		return err
 	}
 
-	if reflect.TypeOf(fullResponse.Errors).Kind().String() == "map" {
-		iter := reflect.ValueOf(fullResponse.Errors).MapRange()
-		errorMap := make(map[string]string)
-		for iter.Next() {
-			errorMap[iter.Key().String()] = fmt.Sprintf("%s", iter.Value())
-		}
-
-		if len(errorMap) > 0 {
-			var errTxt string
-			for field, errorMsg := range errorMap {
-				errTxt = fmt.Sprintf("%s: %s. ", field, errorMsg)
-			}
-			return fmt.Errorf(fmt.Sprintf("API error(-s): %s", errTxt))
-		}
-
-		return fmt.Errorf("unknown API error")
-	}
+	//if reflect.TypeOf(fullResponse.Errors).Kind().String() == "map" {
+	//	iter := reflect.ValueOf(fullResponse.Errors).MapRange()
+	//	errorMap := make(map[string]string)
+	//	for iter.Next() {
+	//		errorMap[iter.Key().String()] = fmt.Sprintf("%s", iter.Value())
+	//	}
+	//
+	//	if len(errorMap) > 0 {
+	//		var errTxt string
+	//		for field, errorMsg := range errorMap {
+	//			errTxt = fmt.Sprintf("%s: %s. ", field, errorMsg)
+	//		}
+	//		return fmt.Errorf(fmt.Sprintf("API error(-s): %s", errTxt))
+	//	}
+	//
+	//	return fmt.Errorf("unknown API error")
+	//}
 
 	return nil
 }

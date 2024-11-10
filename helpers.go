@@ -1,6 +1,22 @@
 package gaf
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
+
+type APIResponse[T any] struct {
+	Get        string          `json:"get"`
+	Parameters json.RawMessage `json:"parameters"`
+	Errors     []APIError      `json:"errors"`
+	Results    int             `json:"results"`
+	Paging     Paging          `json:"paging"`
+	Response   T               `json:"response"`
+}
+
+type APIError struct {
+	Message string `json:"message"`
+}
 
 type successResponse struct {
 	Get     string `json:"get"`
@@ -11,6 +27,15 @@ type successResponse struct {
 		Total   int `json:"total"`
 	} `json:"paging"`
 	Response interface{} `json:"response"`
+}
+
+type Parameters struct {
+	Name string `json:"name,omitempty"`
+}
+
+type Paging struct {
+	Current int `json:"current,omitempty"`
+	Total   int `json:"total,omitempty"`
 }
 
 type TeamExtendedInfo struct {
