@@ -26,5 +26,4 @@ func TestClient_GetSidelined(t *testing.T) {
 	require.Equal(t, "Suspended", res.Response[26].Type)
 	require.Equal(t, "2013-12-15", res.Response[26].Start)
 	require.Equal(t, "2013-12-23", res.Response[26].End)
-
 }
