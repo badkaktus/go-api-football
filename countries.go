@@ -13,13 +13,13 @@ type CountriesOptions struct {
 	Search string `json:"search" url:"search,omitempty"`
 }
 
-type Country []struct {
+type Countries []struct {
 	Name string `json:"name,omitempty"`
 	Code string `json:"code,omitempty"`
 	Flag string `json:"flag,omitempty"`
 }
 
-func (c *Client) GetCountries(ctx context.Context, options *CountriesOptions) (*APIResponse[Country], error) {
+func (c *Client) GetCountries(ctx context.Context, options *CountriesOptions) (*APIResponse[Countries], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (c *Client) GetCountries(ctx context.Context, options *CountriesOptions) (*
 
 	req = req.WithContext(ctx)
 
-	var res APIResponse[Country]
+	var res APIResponse[Countries]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

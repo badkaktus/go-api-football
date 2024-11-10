@@ -18,17 +18,6 @@ type APIError struct {
 	Message string `json:"message"`
 }
 
-type successResponse struct {
-	Get     string `json:"get"`
-	Results int    `json:"results"`
-	Errors  any    `json:"errors"`
-	Paging  struct {
-		Current int `json:"current"`
-		Total   int `json:"total"`
-	} `json:"paging"`
-	Response interface{} `json:"response"`
-}
-
 type Parameters struct {
 	Name string `json:"name,omitempty"`
 }
@@ -555,4 +544,44 @@ type FormationPlayed struct {
 type Cards struct {
 	Yellow IntervalStats `json:"yellow"`
 	Red    IntervalStats `json:"red"`
+}
+
+type Country struct {
+	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
+	Flag string `json:"flag,omitempty"`
+}
+
+type LeagueShort struct {
+	ID   int    `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
+	Logo string `json:"logo,omitempty"`
+}
+
+type Seasons struct {
+	Year     int      `json:"year,omitempty"`
+	Start    string   `json:"start,omitempty"`
+	End      string   `json:"end,omitempty"`
+	Current  bool     `json:"current,omitempty"`
+	Coverage Coverage `json:"coverage,omitempty"`
+}
+
+type Coverage struct {
+	Fixtures    FixturesCoverage `json:"fixtures,omitempty"`
+	Standings   bool             `json:"standings,omitempty"`
+	Players     bool             `json:"players,omitempty"`
+	TopScorers  bool             `json:"top_scorers,omitempty"`
+	TopAssists  bool             `json:"top_assists,omitempty"`
+	TopCards    bool             `json:"top_cards,omitempty"`
+	Injuries    bool             `json:"injuries,omitempty"`
+	Predictions bool             `json:"predictions,omitempty"`
+	Odds        bool             `json:"odds,omitempty"`
+}
+
+type FixturesCoverage struct {
+	Events             bool `json:"events,omitempty"`
+	Lineups            bool `json:"lineups,omitempty"`
+	StatisticsFixtures bool `json:"statistics_fixtures,omitempty"`
+	StatisticsPlayers  bool `json:"statistics_players,omitempty"`
 }

@@ -38,6 +38,9 @@ Not all endpoints have been added to the client at the moment.
 |-----------------------------|------------------------|-----------------------|--------------------------------|
 | Status                      | `/status`              | GetStatus             | -                              |
 | Timezone                    | `/timezone`            | GetTimezone           | -                              |
+| Countries                   | `/countries`           | GetCountries          | CountriesOptions               |
+| Leagues                     | `/leagues`             | GetLeagues            | LeaguesOptions                 |
+| Leagues seasons             | `/leagues/seasons`     | GetLeaguesSeasons     | -                              |
 | Teams information           | `/teams`               | GetTeams              | TeamsOptions                   |
 | Teams statistics            | `/teams/statistics`    | GetTeamStatistics     | TeamStatisticsOption           |
 | Teams seasons               | `/teams/seasons`       | GetTeamSeasons        | TeamSeasonsOptions             |
@@ -57,9 +60,6 @@ Not all endpoints have been added to the client at the moment.
 
 
 ### TODO
-- /countries
-- /leagues
-- /leagues/seasons
 - /teams/countries
 - /fixtures/rounds
 - /injuries
