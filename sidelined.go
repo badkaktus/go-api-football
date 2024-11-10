@@ -18,7 +18,7 @@ type Sidelined []struct {
 	End   string `json:"end"`
 }
 
-func (c *Client) GetSidelined(ctx context.Context, options *SidelinedOptions) (*Sidelined, error) {
+func (c *Client) GetSidelined(ctx context.Context, options *SidelinedOptions) (*APIResponse[Sidelined], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (c *Client) GetSidelined(ctx context.Context, options *SidelinedOptions) (*
 
 	req = req.WithContext(ctx)
 
-	res := Sidelined{}
+	var res APIResponse[Sidelined]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ type OddsLive []struct {
 	Odds    []Odd           `json:"odds"`
 }
 
-func (c *Client) GetOddsLive(ctx context.Context, options *OddsLiveOptions) (*OddsLive, error) {
+func (c *Client) GetOddsLive(ctx context.Context, options *OddsLiveOptions) (*APIResponse[OddsLive], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (c *Client) GetOddsLive(ctx context.Context, options *OddsLiveOptions) (*Od
 
 	req = req.WithContext(ctx)
 
-	res := OddsLive{}
+	var res APIResponse[OddsLive]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}

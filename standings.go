@@ -17,7 +17,7 @@ type Standings []struct {
 	League StandingsLeague `json:"league"`
 }
 
-func (c *Client) GetStandings(ctx context.Context, options *StandingsOptions) (*Standings, error) {
+func (c *Client) GetStandings(ctx context.Context, options *StandingsOptions) (*APIResponse[Standings], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (c *Client) GetStandings(ctx context.Context, options *StandingsOptions) (*
 
 	req = req.WithContext(ctx)
 
-	res := Standings{}
+	var res APIResponse[Standings]
 	if err := c.sendRequest(req, &res); err != nil {
 		return nil, err
 	}
