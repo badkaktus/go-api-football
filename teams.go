@@ -49,7 +49,7 @@ type TeamStatistics struct {
 	Cards         Cards                 `json:"cards"`
 }
 
-func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions) (*APIResponse[Teams], error) {
+func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions, opts ...CallOption) (*APIResponse[Teams], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -64,14 +64,14 @@ func (c *Client) GetTeams(ctx context.Context, options *TeamsOptions) (*APIRespo
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Teams]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions) (*APIResponse[[]int], error) {
+func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions, opts ...CallOption) (*APIResponse[[]int], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -86,14 +86,14 @@ func (c *Client) GetTeamSeasons(ctx context.Context, options *TeamSeasonsOptions
 	req = req.WithContext(ctx)
 
 	var res APIResponse[[]int]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetTeamStatistics(ctx context.Context, options *TeamStatisticsOption) (*APIResponse[TeamStatistics], error) {
+func (c *Client) GetTeamStatistics(ctx context.Context, options *TeamStatisticsOption, opts ...CallOption) (*APIResponse[TeamStatistics], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (c *Client) GetTeamStatistics(ctx context.Context, options *TeamStatisticsO
 	req = req.WithContext(ctx)
 
 	var res APIResponse[TeamStatistics]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 

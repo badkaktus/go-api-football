@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) GetTimezone(ctx context.Context) (*APIResponse[[]string], error) {
+func (c *Client) GetTimezone(ctx context.Context, opts ...CallOption) (*APIResponse[[]string], error) {
 	fullUrl := fmt.Sprintf("%s/timezone", c.BaseURL)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
@@ -16,7 +16,7 @@ func (c *Client) GetTimezone(ctx context.Context) (*APIResponse[[]string], error
 	req = req.WithContext(ctx)
 
 	var res APIResponse[[]string]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 

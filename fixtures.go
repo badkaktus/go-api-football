@@ -100,7 +100,7 @@ type FixturesPlayers []struct {
 	Players []PlayerFixtureInfo `json:"players"`
 }
 
-func (c *Client) GetFixtures(ctx context.Context, options *FixturesOptions) (*APIResponse[Fixtures], error) {
+func (c *Client) GetFixtures(ctx context.Context, options *FixturesOptions, opts ...CallOption) (*APIResponse[Fixtures], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (c *Client) GetFixtures(ctx context.Context, options *FixturesOptions) (*AP
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Fixtures]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetHead2Head(ctx context.Context, options *Head2HeadOptions) (*APIResponse[Fixtures], error) {
+func (c *Client) GetHead2Head(ctx context.Context, options *Head2HeadOptions, opts ...CallOption) (*APIResponse[Fixtures], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -137,14 +137,14 @@ func (c *Client) GetHead2Head(ctx context.Context, options *Head2HeadOptions) (*
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Fixtures]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetFixturesStatistics(ctx context.Context, options *FixturesStatisticsOptions) (*APIResponse[FixturesStatistics], error) {
+func (c *Client) GetFixturesStatistics(ctx context.Context, options *FixturesStatisticsOptions, opts ...CallOption) (*APIResponse[FixturesStatistics], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -159,14 +159,14 @@ func (c *Client) GetFixturesStatistics(ctx context.Context, options *FixturesSta
 	req = req.WithContext(ctx)
 
 	var res APIResponse[FixturesStatistics]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetFixturesEvents(ctx context.Context, options *FixturesEventsOptions) (*APIResponse[FixturesEvents], error) {
+func (c *Client) GetFixturesEvents(ctx context.Context, options *FixturesEventsOptions, opts ...CallOption) (*APIResponse[FixturesEvents], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -181,14 +181,14 @@ func (c *Client) GetFixturesEvents(ctx context.Context, options *FixturesEventsO
 	req = req.WithContext(ctx)
 
 	var res APIResponse[FixturesEvents]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetFixturesLineups(ctx context.Context, options *FixturesLineupsOptions) (*APIResponse[FixturesLineups], error) {
+func (c *Client) GetFixturesLineups(ctx context.Context, options *FixturesLineupsOptions, opts ...CallOption) (*APIResponse[FixturesLineups], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -203,14 +203,14 @@ func (c *Client) GetFixturesLineups(ctx context.Context, options *FixturesLineup
 	req = req.WithContext(ctx)
 
 	var res APIResponse[FixturesLineups]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetFixturesPlayers(ctx context.Context, options *FixturesPlayersOptions) (*APIResponse[FixturesPlayers], error) {
+func (c *Client) GetFixturesPlayers(ctx context.Context, options *FixturesPlayersOptions, opts ...CallOption) (*APIResponse[FixturesPlayers], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -225,7 +225,7 @@ func (c *Client) GetFixturesPlayers(ctx context.Context, options *FixturesPlayer
 	req = req.WithContext(ctx)
 
 	var res APIResponse[FixturesPlayers]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 

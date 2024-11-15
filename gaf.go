@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +20,18 @@ type Client struct {
 	HTTPClient *http.Client
 }
 
+type CallOption func(*CallOptions)
+
+type CallOptions struct {
+	IncludeHeaders bool
+}
+
+func WithHeaders() CallOption {
+	return func(o *CallOptions) {
+		o.IncludeHeaders = true
+	}
+}
+
 func NewClient(apiKey string) *Client {
 	return &Client{
 		BaseURL: fmt.Sprintf("%s://%s", Protocol, BaseDomainV3),
@@ -28,12 +41,60 @@ func NewClient(apiKey string) *Client {
 		},
 	}
 }
+func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string, client *http.Client, opts ...CallOption) error {
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Accept", "application/json; charset=utf-8")
+	req.Header.Set("x-rapidapi-host", BaseDomainV3)
+	req.Header.Set("x-rapidapi-key", apiKey)
 
-func (c *Client) sendRequest(req *http.Request, v interface{}) error {
+	options := &CallOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(res.Body)
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+	}
+
+	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
+		return err
+	}
+
+	if options.IncludeHeaders {
+		val, err := strconv.ParseUint(res.Header.Get("x-ratelimit-requests-remaining"), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		v.Headers.XRateLimitRequestsRemaining = val
+
+		val, err = strconv.ParseUint(res.Header.Get("x-ratelimit-requests-limit"), 10, 64)
+	}
+
+	return nil
+}
+
+func (c *Client) sendRequest(req *http.Request, v interface{}, opts ...CallOption) error {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 	req.Header.Set("x-rapidapi-host", BaseDomainV3)
 	req.Header.Set("x-rapidapi-key", c.apiKey)
+
+	options := &CallOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -51,32 +112,18 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
 
-	//fullResponse := successResponse{
-	//	Response: v,
-	//}
-
-	//fullResponse := v
-
 	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
 		return err
 	}
 
-	//if reflect.TypeOf(fullResponse.Errors).Kind().String() == "map" {
-	//	iter := reflect.ValueOf(fullResponse.Errors).MapRange()
-	//	errorMap := make(map[string]string)
-	//	for iter.Next() {
-	//		errorMap[iter.Key().String()] = fmt.Sprintf("%s", iter.Value())
+	//if options.IncludeHeaders {
+	//	val, err := strconv.ParseUint(res.Header.Get("x-ratelimit-requests-remaining"), 10, 64)
+	//	if err != nil {
+	//		panic(err)
 	//	}
+	//	v.Headers.XRateLimitRequestsRemaining = val
 	//
-	//	if len(errorMap) > 0 {
-	//		var errTxt string
-	//		for field, errorMsg := range errorMap {
-	//			errTxt = fmt.Sprintf("%s: %s. ", field, errorMsg)
-	//		}
-	//		return fmt.Errorf(fmt.Sprintf("API error(-s): %s", errTxt))
-	//	}
-	//
-	//	return fmt.Errorf("unknown API error")
+	//	val, err = strconv.ParseUint(res.Header.Get("x-ratelimit-requests-limit"), 10, 64)
 	//}
 
 	return nil

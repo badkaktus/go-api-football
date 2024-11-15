@@ -19,7 +19,7 @@ type Transfers []struct {
 	Transfers []Transfer `json:"transfers"`
 }
 
-func (c *Client) GetTransfers(ctx context.Context, options *TransfersOptions) (*APIResponse[Transfers], error) {
+func (c *Client) GetTransfers(ctx context.Context, options *TransfersOptions, opts ...CallOption) (*APIResponse[Transfers], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (c *Client) GetTransfers(ctx context.Context, options *TransfersOptions) (*
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Transfers]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 

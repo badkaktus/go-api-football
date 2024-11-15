@@ -24,7 +24,7 @@ type StatusResponse struct {
 	} `json:"requests"`
 }
 
-func (c *Client) GetStatus(ctx context.Context) (*APIResponse[StatusResponse], error) {
+func (c *Client) GetStatus(ctx context.Context, opts ...CallOption) (*APIResponse[StatusResponse], error) {
 	fullUrl := fmt.Sprintf("%s/status", c.BaseURL)
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
@@ -34,7 +34,7 @@ func (c *Client) GetStatus(ctx context.Context) (*APIResponse[StatusResponse], e
 	req = req.WithContext(ctx)
 
 	var res APIResponse[StatusResponse]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
