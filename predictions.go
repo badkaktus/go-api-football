@@ -19,7 +19,7 @@ type Predictions []struct {
 	H2H         []Head2Head      `json:"h2h"`
 }
 
-func (c *Client) GetPredictions(ctx context.Context, options *PredictionsOptions) (*APIResponse[Predictions], error) {
+func (c *Client) GetPredictions(ctx context.Context, options *PredictionsOptions, opts ...CallOption) (*APIResponse[Predictions], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (c *Client) GetPredictions(ctx context.Context, options *PredictionsOptions
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Predictions]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 

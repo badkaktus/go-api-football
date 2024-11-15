@@ -11,12 +11,18 @@ import (
 func TestClient_GetStatus(t *testing.T) {
 	server := httptest.NewServer(getHandler(t, &HandlerHelper{
 		ResponseBody: `{"get":"status","parameters":[],"errors":[],"results":0,"paging":{"current":1,"total":1},"response":{"account":{"firstname":"Alexander","lastname":"Aleksandrov","email":"spritewwarren@protonmail.com"},"subscription":{"plan":"Free","end":"2024-11-25T03:30:02+00:00","active":true},"requests":{"current":29,"limit_day":100}}}`,
+		ResponseHeaders: map[string]int{
+			"X-RateLimit-Limit":              10,
+			"X-RateLimit-Remaining":          5,
+			"x-ratelimit-requests-limit":     100,
+			"x-ratelimit-requests-remaining": 29,
+		},
 	}))
 	defer server.Close()
 
 	client := NewTestClientWithCustomHandler(t, server)
 
-	res, err := client.GetStatus(context.Background())
+	res, err := client.GetStatus(context.Background(), WithHeaders())
 	require.NoError(t, err)
 
 	require.Equal(t, 29, res.Response.Requests.Current)
@@ -27,4 +33,8 @@ func TestClient_GetStatus(t *testing.T) {
 	require.Equal(t, "2024-11-25 03:30:02", res.Response.Subscription.End.Format("2006-01-02 15:04:05"))
 	require.True(t, res.Response.Subscription.Active)
 	require.Equal(t, 100, res.Response.Requests.LimitDay)
+	require.Equal(t, 100, res.Headers.XRateLimitRequestsLimit)
+	require.Equal(t, 29, res.Headers.XRateLimitRequestsRemaining)
+	require.Equal(t, 10, res.Headers.XRateLimitLimit)
+	require.Equal(t, 5, res.Headers.XRateLimitRemaining)
 }

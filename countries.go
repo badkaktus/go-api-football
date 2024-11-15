@@ -19,7 +19,7 @@ type Countries []struct {
 	Flag string `json:"flag,omitempty"`
 }
 
-func (c *Client) GetCountries(ctx context.Context, options *CountriesOptions) (*APIResponse[Countries], error) {
+func (c *Client) GetCountries(ctx context.Context, options *CountriesOptions, opts ...CallOption) (*APIResponse[Countries], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (c *Client) GetCountries(ctx context.Context, options *CountriesOptions) (*
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Countries]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 

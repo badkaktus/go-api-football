@@ -12,6 +12,18 @@ type APIResponse[T any] struct {
 	Results    int             `json:"results"`
 	Paging     Paging          `json:"paging"`
 	Response   T               `json:"response"`
+	//Headers    interface{}     `json:"-"` // This field is not included in the JSON
+	Headers struct {
+		XRateLimitLimit             interface{}
+		XRateLimitRemaining         interface{}
+		XRateLimitRequestsLimit     interface{}
+		XRateLimitRequestsRemaining interface{}
+	} `json:"-"` // This field is not included in the JSON
+}
+
+type HeadersTest struct {
+	Field1 string `json:"field1"`
+	Field2 string `json:"field2"`
 }
 
 type APIError struct {

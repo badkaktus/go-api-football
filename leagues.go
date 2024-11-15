@@ -26,7 +26,7 @@ type Leagues []struct {
 	Seasons []Seasons   `json:"seasons,omitempty"`
 }
 
-func (c *Client) GetLeagues(ctx context.Context, options *LeaguesOptions) (*APIResponse[Leagues], error) {
+func (c *Client) GetLeagues(ctx context.Context, options *LeaguesOptions, opts ...CallOption) (*APIResponse[Leagues], error) {
 	v, err := query.Values(options)
 	if err != nil {
 		return nil, err
@@ -41,14 +41,14 @@ func (c *Client) GetLeagues(ctx context.Context, options *LeaguesOptions) (*APIR
 	req = req.WithContext(ctx)
 
 	var res APIResponse[Leagues]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
 	return &res, nil
 }
 
-func (c *Client) GetLeaguesSeasons(ctx context.Context) (*APIResponse[[]int], error) {
+func (c *Client) GetLeaguesSeasons(ctx context.Context, opts ...CallOption) (*APIResponse[[]int], error) {
 	fullUrl := fmt.Sprintf("%s/leagues/seasons", c.BaseURL)
 
 	req, err := http.NewRequest("GET", fullUrl, nil)
@@ -59,7 +59,7 @@ func (c *Client) GetLeaguesSeasons(ctx context.Context) (*APIResponse[[]int], er
 	req = req.WithContext(ctx)
 
 	var res APIResponse[[]int]
-	if err := c.sendRequest(req, &res); err != nil {
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}
 
