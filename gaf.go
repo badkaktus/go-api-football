@@ -73,58 +73,30 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 	}
 
 	if options.IncludeHeaders {
-		val, err := strconv.ParseUint(res.Header.Get("x-ratelimit-requests-remaining"), 10, 64)
+		val, err := strconv.Atoi(res.Header.Get("x-ratelimit-requests-remaining"))
 		if err != nil {
 			panic(err)
 		}
 		v.Headers.XRateLimitRequestsRemaining = val
 
-		val, err = strconv.ParseUint(res.Header.Get("x-ratelimit-requests-limit"), 10, 64)
-	}
-
-	return nil
-}
-
-func (c *Client) sendRequest(req *http.Request, v interface{}, opts ...CallOption) error {
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "application/json; charset=utf-8")
-	req.Header.Set("x-rapidapi-host", BaseDomainV3)
-	req.Header.Set("x-rapidapi-key", c.apiKey)
-
-	options := &CallOptions{}
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	res, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+		val, err = strconv.Atoi(res.Header.Get("x-ratelimit-requests-limit"))
 		if err != nil {
 			panic(err)
 		}
-	}(res.Body)
+		v.Headers.XRateLimitRequestsLimit = val
 
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+		val, err = strconv.Atoi(res.Header.Get("X-RateLimit-Limit"))
+		if err != nil {
+			panic(err)
+		}
+		v.Headers.XRateLimitLimit = val
+
+		val, err = strconv.Atoi(res.Header.Get("X-RateLimit-Remaining"))
+		if err != nil {
+			panic(err)
+		}
+		v.Headers.XRateLimitRemaining = val
 	}
-
-	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
-		return err
-	}
-
-	//if options.IncludeHeaders {
-	//	val, err := strconv.ParseUint(res.Header.Get("x-ratelimit-requests-remaining"), 10, 64)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	v.Headers.XRateLimitRequestsRemaining = val
-	//
-	//	val, err = strconv.ParseUint(res.Header.Get("x-ratelimit-requests-limit"), 10, 64)
-	//}
 
 	return nil
 }

@@ -14,7 +14,7 @@ type APIResponse[T any] struct {
 	Response   T               `json:"response"`
 	//Headers    interface{}     `json:"-"` // This field is not included in the JSON
 	Headers struct {
-		XRateLimit                  interface{}
+		XRateLimitLimit             interface{}
 		XRateLimitRemaining         interface{}
 		XRateLimitRequestsLimit     interface{}
 		XRateLimitRequestsRemaining interface{}
