@@ -359,5 +359,5 @@ func TestGetFixturesFreePlanError(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, 0, len(resp.Response))
-	require.Equal(t, "Free plans do not have access to this season, try from 2021 to 2023.", resp.Errors.Plan)
+	require.Equal(t, "Free plans do not have access to this season, try from 2021 to 2023.", resp.Errors.Val.Plan)
 }

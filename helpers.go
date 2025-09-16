@@ -1,14 +1,16 @@
 package gaf
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
 type APIResponse[T any] struct {
 	Get        string          `json:"get"`
 	Parameters json.RawMessage `json:"parameters"`
-	Errors     APIError        `json:"errors"`
+	Errors     APIErrors       `json:"errors"`
 	Results    int             `json:"results"`
 	Paging     Paging          `json:"paging"`
 	Response   T               `json:"response"`
@@ -29,6 +31,51 @@ type HeadersTest struct {
 type APIError struct {
 	Message string `json:"message,omitempty"`
 	Plan    string `json:"plan,omitempty"`
+}
+
+type APIErrors struct {
+	Val *APIError
+}
+
+func (e *APIErrors) UnmarshalJSON(b []byte) error {
+	s := bytes.TrimSpace(b)
+	switch {
+	case bytes.Equal(s, []byte("null")):
+		e.Val = nil
+		return nil
+	case len(s) > 0 && s[0] == '[':
+		var tmp []json.RawMessage
+		if err := json.Unmarshal(s, &tmp); err != nil {
+			return fmt.Errorf("errors: expected [], got invalid array: %w", err)
+		}
+		if len(tmp) != 0 {
+			return fmt.Errorf("errors: expected empty array, got %d elements", len(tmp))
+		}
+		e.Val = nil
+		return nil
+	case len(s) > 0 && s[0] == '{':
+		var ae APIError
+		if err := json.Unmarshal(s, &ae); err != nil {
+			return fmt.Errorf("errors: invalid object: %w", err)
+		}
+		e.Val = &ae
+		return nil
+	default:
+		return fmt.Errorf("errors: unexpected json: %s", string(s))
+	}
+}
+
+func (e *APIErrors) Error() error {
+	if e == nil || e.Val == nil {
+		return nil
+	}
+	if e.Val.Message != "" {
+		return fmt.Errorf(e.Val.Message)
+	}
+	if e.Val.Plan != "" {
+		return fmt.Errorf(e.Val.Plan)
+	}
+	return fmt.Errorf("unknown api error")
 }
 
 type Parameters struct {
