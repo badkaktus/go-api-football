@@ -2,9 +2,10 @@ package gaf
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetFixtures(t *testing.T) {
@@ -340,4 +341,23 @@ func TestClient_GetFixturesPlayers(t *testing.T) {
 	require.Equal(t, 0, resp.Response[0].Players[0].Statistics[0].Penalty.Scored)
 	require.Equal(t, 0, resp.Response[0].Players[0].Statistics[0].Penalty.Missed)
 	require.Equal(t, 0, resp.Response[0].Players[0].Statistics[0].Penalty.Saved)
+}
+
+func TestGetFixturesFreePlanError(t *testing.T) {
+	server := httptest.NewServer(getHandler(t, &HandlerHelper{
+		ResponseBody: `{"get":"fixtures","parameters":{"date":"2025-03-28","season":"2025","team":"597"},"errors":{"plan":"Free plans do not have access to this season, try from 2021 to 2023."},"results":0,"paging":{"current":1,"total":1},"response":[]}`,
+	}))
+	defer server.Close()
+
+	client := NewTestClientWithCustomHandler(t, server)
+
+	options := &FixturesOptions{
+		Live: "all",
+	}
+
+	resp, err := client.GetFixtures(context.Background(), options)
+	require.NoError(t, err)
+
+	require.Equal(t, 0, len(resp.Response))
+	require.Equal(t, "Free plans do not have access to this season, try from 2021 to 2023.", resp.Errors.Val.Plan)
 }
