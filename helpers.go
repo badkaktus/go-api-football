@@ -8,7 +8,7 @@ import (
 type APIResponse[T any] struct {
 	Get        string          `json:"get"`
 	Parameters json.RawMessage `json:"parameters"`
-	Errors     []APIError      `json:"errors"`
+	Errors     APIError        `json:"errors"`
 	Results    int             `json:"results"`
 	Paging     Paging          `json:"paging"`
 	Response   T               `json:"response"`
@@ -27,7 +27,8 @@ type HeadersTest struct {
 }
 
 type APIError struct {
-	Message string `json:"message"`
+	Message string `json:"message,omitempty"`
+	Plan    string `json:"plan,omitempty"`
 }
 
 type Parameters struct {
