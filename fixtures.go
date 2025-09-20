@@ -3,8 +3,9 @@ package gaf
 import (
 	"context"
 	"fmt"
-	"github.com/google/go-querystring/query"
 	"net/http"
+
+	"github.com/google/go-querystring/query"
 )
 
 type FixturesOptions struct {
@@ -70,11 +71,15 @@ type FixturesStatistics []struct {
 }
 
 type Fixtures []struct {
-	Fixture Fixture        `json:"fixture"`
-	League  LeagueInfo     `json:"league"`
-	Teams   TeamsFixture   `json:"teams"`
-	Goals   Goals          `json:"goals"`
-	Score   ScoreInFixture `json:"score"`
+	Fixture    Fixture            `json:"fixture"`
+	League     LeagueInfo         `json:"league"`
+	Teams      TeamsFixture       `json:"teams"`
+	Goals      Goals              `json:"goals"`
+	Score      ScoreInFixture     `json:"score"`
+	Events     FixturesEvents     `json:"events"`
+	Lineups    []Lineups          `json:"lineups"`
+	Statistics FixturesStatistics `json:"statistics"`
+	Players    FixturesPlayers    `json:"players"`
 }
 
 type FixturesEvents []struct {
