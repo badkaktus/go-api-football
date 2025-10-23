@@ -23,11 +23,6 @@ type APIResponse[T any] struct {
 	} `json:"-"` // This field is not included in the JSON
 }
 
-type HeadersTest struct {
-	Field1 string `json:"field1"`
-	Field2 string `json:"field2"`
-}
-
 type APIError struct {
 	Message string `json:"message,omitempty"`
 	Plan    string `json:"plan,omitempty"`
@@ -108,9 +103,9 @@ type VenueExtendedInfo struct {
 }
 
 type VenueShortInfo struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	City string `json:"city"`
+	ID   *int    `json:"id"`
+	Name *string `json:"name"`
+	City *string `json:"city"`
 }
 
 type League struct {
@@ -132,8 +127,8 @@ type TeamShortInfo struct {
 }
 
 type TypeValueStatistic struct {
-	Type  string `json:"type"`
-	Value any    `json:"value"`
+	Type  *string `json:"type"`
+	Value *any    `json:"value"`
 }
 
 type Periods struct {
@@ -144,7 +139,8 @@ type Periods struct {
 type Status struct {
 	Long    string `json:"long"`
 	Short   string `json:"short"`
-	Elapsed int    `json:"elapsed"`
+	Elapsed *int   `json:"elapsed"`
+	Extra   *int   `json:"extra"`
 }
 
 type LeagueInfo struct {
@@ -163,15 +159,15 @@ type TeamsFixture struct {
 }
 
 type TeamFixtureInfo struct {
-	ID     int    `json:"id"`
+	ID     *int   `json:"id"`
 	Name   string `json:"name"`
 	Logo   string `json:"logo"`
-	Winner bool   `json:"winner"`
+	Winner *bool  `json:"winner"`
 }
 
 type Fixture struct {
 	ID        int            `json:"id"`
-	Referee   string         `json:"referee"`
+	Referee   *string        `json:"referee"`
 	Timezone  string         `json:"timezone"`
 	Date      time.Time      `json:"date"`
 	Timestamp int            `json:"timestamp"`
@@ -181,8 +177,8 @@ type Fixture struct {
 }
 
 type Goals struct {
-	Home int `json:"home"`
-	Away int `json:"away"`
+	Home *int `json:"home"`
+	Away *int `json:"away"`
 }
 
 type ScoreInFixture struct {
@@ -193,20 +189,20 @@ type ScoreInFixture struct {
 }
 
 type FixtureTime struct {
-	Elapsed int `json:"elapsed"`
-	Extra   int `json:"extra"`
+	Elapsed *int `json:"elapsed"`
+	Extra   *int `json:"extra"`
 }
 
 type Player struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID   *int    `json:"id"`
+	Name *string `json:"name"`
 }
 
 type TeamFixtureFullInfo struct {
-	ID     int    `json:"id"`
-	Name   string `json:"name"`
-	Logo   string `json:"logo"`
-	Colors `json:"colors"`
+	ID     int     `json:"id"`
+	Name   string  `json:"name"`
+	Logo   string  `json:"logo"`
+	Colors *Colors `json:"colors"`
 }
 
 type Colors struct {
@@ -225,79 +221,79 @@ type Lineups struct {
 }
 
 type PlayerInLineup struct {
-	ID     int    `json:"id"`
-	Name   string `json:"name"`
-	Number int    `json:"number"`
-	Pos    string `json:"pos"`
-	Grid   string `json:"grid"`
+	ID     *int    `json:"id"`
+	Name   *string `json:"name"`
+	Number *int    `json:"number"`
+	Pos    *string `json:"pos"`
+	Grid   *string `json:"grid"`
 }
 
 type PlayerWithPhoto struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Photo string `json:"photo"`
+	ID    *int    `json:"id"`
+	Name  *string `json:"name"`
+	Photo *string `json:"photo"`
 }
 
 type GameStatistic struct {
-	Minutes    int    `json:"minutes"`
-	Number     int    `json:"number"`
-	Position   string `json:"position"`
-	Rating     string `json:"rating"`
-	Captain    bool   `json:"captain"`
-	Substitute bool   `json:"substitute"`
+	Minutes    *int    `json:"minutes"`
+	Number     *int    `json:"number"`
+	Position   *string `json:"position"`
+	Rating     *string `json:"rating"`
+	Captain    *bool   `json:"captain"`
+	Substitute *bool   `json:"substitute"`
 }
 
 type Shots struct {
-	Total int `json:"total"`
-	On    int `json:"on"`
+	Total *int `json:"total"`
+	On    *int `json:"on"`
 }
 
 type PersonalFixtureStats struct {
-	Total    int `json:"total"`
-	Conceded int `json:"conceded"`
-	Assists  int `json:"assists"`
-	Saves    int `json:"saves"`
+	Total    *int `json:"total"`
+	Conceded *int `json:"conceded"`
+	Assists  *int `json:"assists"`
+	Saves    *int `json:"saves"`
 }
 
 type PersonalPassesStats struct {
-	Total    int    `json:"total"`
-	Key      int    `json:"key"`
-	Accuracy string `json:"accuracy"`
+	Total    *int    `json:"total"`
+	Key      *int    `json:"key"`
+	Accuracy *string `json:"accuracy"`
 }
 
 type PersonalTacklesStats struct {
-	Total         int `json:"total"`
-	Blocks        int `json:"blocks"`
-	Interceptions int `json:"interceptions"`
+	Total         *int `json:"total"`
+	Blocks        *int `json:"blocks"`
+	Interceptions *int `json:"interceptions"`
 }
 
 type DuelsStats struct {
-	Total int `json:"total"`
-	Won   int `json:"won"`
+	Total *int `json:"total"`
+	Won   *int `json:"won"`
 }
 
 type DribblesStats struct {
-	Attempts int `json:"attempts"`
-	Success  int `json:"success"`
-	Past     int `json:"past"`
+	Attempts *int `json:"attempts"`
+	Success  *int `json:"success"`
+	Past     *int `json:"past"`
 }
 
 type FoulsStats struct {
-	Drawn     int `json:"drawn"`
-	Committed int `json:"committed"`
+	Drawn     *int `json:"drawn"`
+	Committed *int `json:"committed"`
 }
 
 type CardsStats struct {
-	Yellow int `json:"yellow"`
-	Red    int `json:"red"`
+	Yellow *int `json:"yellow"`
+	Red    *int `json:"red"`
 }
 
 type PenaltyStats struct {
-	Won      int `json:"won"`
-	Commited int `json:"commited"`
-	Scored   int `json:"scored"`
-	Missed   int `json:"missed"`
-	Saved    int `json:"saved"`
+	Won      *int `json:"won"`
+	Commited *int `json:"commited"`
+	Scored   *int `json:"scored"`
+	Missed   *int `json:"missed"`
+	Saved    *int `json:"saved"`
 }
 
 type TeamStatisticsPenalty struct {
@@ -308,7 +304,7 @@ type TeamStatisticsPenalty struct {
 
 type PlayerStatistics struct {
 	Games    GameStatistic        `json:"games"`
-	Offsides int                  `json:"offsides"`
+	Offsides *int                 `json:"offsides"`
 	Shots    Shots                `json:"shots"`
 	Goals    PersonalFixtureStats `json:"goals"`
 	Passes   PersonalPassesStats  `json:"passes"`
