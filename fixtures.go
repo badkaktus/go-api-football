@@ -71,15 +71,15 @@ type FixturesStatistics []struct {
 }
 
 type Fixtures []struct {
-	Fixture    Fixture            `json:"fixture"`
-	League     LeagueInfo         `json:"league"`
-	Teams      TeamsFixture       `json:"teams"`
-	Goals      Goals              `json:"goals"`
-	Score      ScoreInFixture     `json:"score"`
-	Events     FixturesEvents     `json:"events"`
-	Lineups    []Lineups          `json:"lineups"`
-	Statistics FixturesStatistics `json:"statistics"`
-	Players    FixturesPlayers    `json:"players"`
+	Fixture    Fixture             `json:"fixture"`
+	League     LeagueInfo          `json:"league"`
+	Teams      TeamsFixture        `json:"teams"`
+	Goals      Goals               `json:"goals"`
+	Score      ScoreInFixture      `json:"score"`
+	Events     *FixturesEvents     `json:"events"`
+	Lineups    *FixturesLineups    `json:"lineups"`
+	Statistics *FixturesStatistics `json:"statistics"`
+	Players    *FixturesPlayers    `json:"players"`
 }
 
 type FixturesEvents []struct {
@@ -87,14 +87,14 @@ type FixturesEvents []struct {
 	Team     TeamShortInfo `json:"team"`
 	Player   Player        `json:"player"`
 	Assist   Player        `json:"assist"`
-	Type     string        `json:"type"`
-	Detail   string        `json:"detail"`
-	Comments string        `json:"comments"`
+	Type     *string       `json:"type"`
+	Detail   *string       `json:"detail"`
+	Comments *string       `json:"comments"`
 }
 
 type FixturesLineups []struct {
 	Team        TeamFixtureFullInfo `json:"team"`
-	Formation   string              `json:"formation"`
+	Formation   *string             `json:"formation"`
 	StartXI     []Lineups           `json:"startXI"`
 	Substitutes []Lineups           `json:"substitutes"`
 	Coach       PlayerWithPhoto     `json:"coach"`
@@ -103,6 +103,19 @@ type FixturesLineups []struct {
 type FixturesPlayers []struct {
 	Team    TeamShortInfo       `json:"team"`
 	Players []PlayerFixtureInfo `json:"players"`
+}
+
+type FixturesRoundsOptions struct {
+	League   int    `json:"league" url:"league"`
+	Season   int    `json:"season" url:"season"`
+	Current  bool   `json:"current" url:"current,omitempty"`
+	Dates    bool   `json:"dates" url:"dates,omitempty"`
+	Timezone string `json:"timezone" url:"timezone,omitempty"`
+}
+
+type FixturesRounds struct {
+	Round string   `json:"round"`
+	Dates []string `json:"dates"`
 }
 
 func (c *Client) GetFixtures(ctx context.Context, options *FixturesOptions, opts ...CallOption) (*APIResponse[Fixtures], error) {
@@ -230,6 +243,28 @@ func (c *Client) GetFixturesPlayers(ctx context.Context, options *FixturesPlayer
 	req = req.WithContext(ctx)
 
 	var res APIResponse[FixturesPlayers]
+	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (c *Client) GetFixturesRounds(ctx context.Context, options *FixturesRoundsOptions, opts ...CallOption) (*APIResponse[[]FixturesRounds], error) {
+	v, err := query.Values(options)
+	if err != nil {
+		return nil, err
+	}
+	fullUrl := fmt.Sprintf("%s/fixtures/rounds?%s", c.BaseURL, v.Encode())
+	//fmt.Println("Full URL:", fullUrl) // Debug print to check the full URL
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req = req.WithContext(ctx)
+
+	var res APIResponse[[]FixturesRounds]
 	if err := SendTypedRequest(req, &res, c.apiKey, c.HTTPClient, opts...); err != nil {
 		return nil, err
 	}

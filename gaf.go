@@ -46,7 +46,6 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 	req.Header.Set("x-rapidapi-host", BaseDomainV3)
 	req.Header.Set("x-rapidapi-key", apiKey)
-
 	options := &CallOptions{}
 	for _, opt := range opts {
 		opt(options)
@@ -56,6 +55,17 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 	if err != nil {
 		return err
 	}
+
+	//// читаем body в память
+	//bodyBytes, err := io.ReadAll(res.Body)
+	//if err != nil {
+	//	return err
+	//}
+	//// выводим в лог
+	//fmt.Println(string(bodyBytes))
+	//
+	//// возвращаем body обратно для дальнейшей обработки
+	//res.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
