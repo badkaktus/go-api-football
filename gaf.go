@@ -82,6 +82,10 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 		return err
 	}
 
+	if v.Errors.Val != nil && v.Errors.Val.Requests != "" {
+		return fmt.Errorf("%w: %s", ErrRequestLimitReached, v.Errors.Val.Requests)
+	}
+
 	if options.IncludeHeaders {
 		val, err := strconv.Atoi(res.Header.Get("x-ratelimit-requests-remaining"))
 		if err != nil {
