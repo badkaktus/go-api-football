@@ -3,9 +3,14 @@ package gaf
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
+
+// ErrRequestLimitReached is returned when the API reports that the daily request
+// limit has been exhausted (the "requests" key of the errors object).
+var ErrRequestLimitReached = errors.New("request limit reached")
 
 type APIResponse[T any] struct {
 	Get        string          `json:"get"`
@@ -24,8 +29,9 @@ type APIResponse[T any] struct {
 }
 
 type APIError struct {
-	Message string `json:"message,omitempty"`
-	Plan    string `json:"plan,omitempty"`
+	Message  string `json:"message,omitempty"`
+	Plan     string `json:"plan,omitempty"`
+	Requests string `json:"requests,omitempty"`
 }
 
 type APIErrors struct {
