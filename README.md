@@ -31,6 +31,51 @@ if err != nil {
 }
 ```
 
+### Error handling
+
+Every method returns a typed error, so a caller can tell a transient rate limit from a
+real failure without matching on error strings.
+
+| Sentinel                 | When it is returned                                                              |
+|--------------------------|----------------------------------------------------------------------------------|
+| `gaf.ErrTooManyRequests` | HTTP 429 — the per-minute rate limit is exhausted. Back off and retry.            |
+| `gaf.ErrRequestLimitReached` | HTTP 200 with `{"errors":{"requests":"..."}}` — the **daily** quota is used up. Retrying today will not help. |
+| `gaf.ErrUnauthorized`    | HTTP 401 / 403 — the API key is missing, invalid or not allowed on this endpoint. |
+| `gaf.ErrServerError`     | HTTP 5xx — the failure is on the API side, the call may be retried later.         |
+
+Note the difference between the two limits: api-sports reports the **minute** limit with
+HTTP 429, but the **daily** quota with HTTP 200 and an error object in the body. They are
+separate sentinels and need different reactions.
+
+```go
+res, err := gafClient.GetTeams(context.Background(), &req)
+switch {
+case errors.Is(err, gaf.ErrTooManyRequests):
+    // Minute limit: wait and retry.
+case errors.Is(err, gaf.ErrRequestLimitReached):
+    // Daily quota: stop until the quota resets.
+case errors.Is(err, gaf.ErrUnauthorized):
+    // Bad API key: no point in retrying.
+case err != nil:
+    return err
+}
+```
+
+For every non-2xx response the error is also a `*gaf.APIStatusError`, which carries the
+status code, a preview of the response body (up to 1 KB) and the parsed `Retry-After`
+header. `RetryAfter` is zero when the header is absent or cannot be parsed.
+
+```go
+var statusErr *gaf.APIStatusError
+if errors.As(err, &statusErr) {
+    log.Printf("status %d: %s", statusErr.StatusCode, statusErr.Body)
+
+    if statusErr.RetryAfter > 0 {
+        time.Sleep(statusErr.RetryAfter)
+    }
+}
+```
+
 Not all endpoints have been added to the client at the moment.
 ### List of added endpoints:
 
