@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -56,22 +55,8 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 		return err
 	}
 
-	//// читаем body в память
-	//bodyBytes, err := io.ReadAll(res.Body)
-	//if err != nil {
-	//	return err
-	//}
-	//// выводим в лог
-	//fmt.Println(string(bodyBytes))
-	//
-	//// возвращаем body обратно для дальнейшей обработки
-	//res.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			panic(err)
-		}
+		_ = Body.Close()
 	}(res.Body)
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
@@ -86,30 +71,13 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 		return fmt.Errorf("%w: %s", ErrRequestLimitReached, v.Errors.Val.Requests)
 	}
 
+	// Rate limit headers are informational: a missing or non-numeric header leaves
+	// the corresponding field at zero instead of failing the call.
 	if options.IncludeHeaders {
-		val, err := strconv.Atoi(res.Header.Get("x-ratelimit-requests-remaining"))
-		if err != nil {
-			panic(err)
-		}
-		v.Headers.XRateLimitRequestsRemaining = val
-
-		val, err = strconv.Atoi(res.Header.Get("x-ratelimit-requests-limit"))
-		if err != nil {
-			panic(err)
-		}
-		v.Headers.XRateLimitRequestsLimit = val
-
-		val, err = strconv.Atoi(res.Header.Get("X-RateLimit-Limit"))
-		if err != nil {
-			panic(err)
-		}
-		v.Headers.XRateLimitLimit = val
-
-		val, err = strconv.Atoi(res.Header.Get("X-RateLimit-Remaining"))
-		if err != nil {
-			panic(err)
-		}
-		v.Headers.XRateLimitRemaining = val
+		v.Headers.XRateLimitRequestsRemaining = atoiOrZero(res.Header.Get("x-ratelimit-requests-remaining"))
+		v.Headers.XRateLimitRequestsLimit = atoiOrZero(res.Header.Get("x-ratelimit-requests-limit"))
+		v.Headers.XRateLimitLimit = atoiOrZero(res.Header.Get("X-RateLimit-Limit"))
+		v.Headers.XRateLimitRemaining = atoiOrZero(res.Header.Get("X-RateLimit-Remaining"))
 	}
 
 	return nil

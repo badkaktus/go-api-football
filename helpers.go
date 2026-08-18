@@ -5,12 +5,23 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 )
 
 // ErrRequestLimitReached is returned when the API reports that the daily request
 // limit has been exhausted (the "requests" key of the errors object).
 var ErrRequestLimitReached = errors.New("request limit reached")
+
+// atoiOrZero parses a numeric header value and falls back to zero when the header
+// is absent or not a number.
+func atoiOrZero(value string) int {
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return 0
+	}
+	return parsed
+}
 
 type APIResponse[T any] struct {
 	Get        string          `json:"get"`

@@ -9,9 +9,13 @@ import (
 )
 
 type HandlerHelper struct {
-	Code            int
-	ResponseBody    string
+	Code         int
+	ResponseBody string
+	// ResponseHeaders sets numeric response headers.
 	ResponseHeaders map[string]int
+	// ResponseStringHeaders sets response headers whose value is not a number,
+	// such as an HTTP date in Retry-After.
+	ResponseStringHeaders map[string]string
 }
 
 func getHandler(t *testing.T, param *HandlerHelper) http.HandlerFunc {
@@ -24,6 +28,10 @@ func getHandler(t *testing.T, param *HandlerHelper) http.HandlerFunc {
 		// Set the response headers
 		for key, value := range param.ResponseHeaders {
 			w.Header().Set(key, strconv.Itoa(value))
+		}
+
+		for key, value := range param.ResponseStringHeaders {
+			w.Header().Set(key, value)
 		}
 
 		w.WriteHeader(httpStatus)
