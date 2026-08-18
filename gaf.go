@@ -60,7 +60,7 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 	}(res.Body)
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+		return newAPIStatusError(res)
 	}
 
 	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {

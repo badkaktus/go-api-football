@@ -5,13 +5,104 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // ErrRequestLimitReached is returned when the API reports that the daily request
 // limit has been exhausted (the "requests" key of the errors object).
 var ErrRequestLimitReached = errors.New("request limit reached")
+
+// ErrTooManyRequests is returned when the API answers with HTTP 429, meaning the
+// per-minute rate limit is exhausted and the caller should back off before retrying.
+var ErrTooManyRequests = errors.New("too many requests")
+
+// ErrUnauthorized is returned when the API answers with HTTP 401 or 403, meaning
+// the API key is missing, invalid or not allowed to use the endpoint.
+var ErrUnauthorized = errors.New("unauthorized")
+
+// ErrServerError is returned when the API answers with a 5xx status code, meaning
+// the failure is on the API side and the call may be retried later.
+var ErrServerError = errors.New("server error")
+
+// maxErrorBodyPreview limits how many bytes of a failed response body are kept in
+// APIStatusError.Body.
+const maxErrorBodyPreview = 1024
+
+// APIStatusError describes a response with a status code the client cannot process.
+// Use errors.As to inspect it and errors.Is to match it against ErrTooManyRequests,
+// ErrUnauthorized or ErrServerError.
+type APIStatusError struct {
+	// StatusCode is the HTTP status code of the response.
+	StatusCode int
+	// Body holds the beginning of the response body, truncated to maxErrorBodyPreview bytes.
+	Body string
+	// RetryAfter holds the parsed Retry-After header. It is zero when the header is
+	// absent or cannot be parsed.
+	RetryAfter time.Duration
+}
+
+func (e *APIStatusError) Error() string {
+	if e.Body == "" {
+		return fmt.Sprintf("api-football: unexpected status code %d", e.StatusCode)
+	}
+	return fmt.Sprintf("api-football: unexpected status code %d: %s", e.StatusCode, e.Body)
+}
+
+// Unwrap maps the status code onto a sentinel error so that callers can use
+// errors.Is. It returns nil for status codes that fall into no known category.
+func (e *APIStatusError) Unwrap() error {
+	switch {
+	case e.StatusCode == http.StatusTooManyRequests:
+		return ErrTooManyRequests
+	case e.StatusCode == http.StatusUnauthorized, e.StatusCode == http.StatusForbidden:
+		return ErrUnauthorized
+	case e.StatusCode >= 500 && e.StatusCode <= 599:
+		return ErrServerError
+	default:
+		return nil
+	}
+}
+
+// newAPIStatusError builds an APIStatusError from a failed response, reading a
+// bounded preview of its body. Read errors are ignored: whatever was read is kept.
+func newAPIStatusError(res *http.Response) *APIStatusError {
+	body, _ := io.ReadAll(io.LimitReader(res.Body, maxErrorBodyPreview))
+
+	return &APIStatusError{
+		StatusCode: res.StatusCode,
+		Body:       strings.TrimSpace(string(body)),
+		RetryAfter: parseRetryAfter(res.Header.Get("Retry-After"), time.Now()),
+	}
+}
+
+// parseRetryAfter parses a Retry-After header value, which is either a number of
+// seconds or an HTTP date. An absent, malformed or already elapsed value yields a
+// zero duration, which is not an error.
+func parseRetryAfter(value string, now time.Time) time.Duration {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return 0
+	}
+
+	if seconds, err := strconv.Atoi(value); err == nil {
+		if seconds <= 0 {
+			return 0
+		}
+		return time.Duration(seconds) * time.Second
+	}
+
+	if date, err := http.ParseTime(value); err == nil {
+		if delay := date.Sub(now); delay > 0 {
+			return delay
+		}
+	}
+
+	return 0
+}
 
 // atoiOrZero parses a numeric header value and falls back to zero when the header
 // is absent or not a number.
