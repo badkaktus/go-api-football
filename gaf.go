@@ -63,12 +63,25 @@ func SendTypedRequest[T any](req *http.Request, v *APIResponse[T], apiKey string
 		return newAPIStatusError(res)
 	}
 
-	if err = json.NewDecoder(res.Body).Decode(&v); err != nil {
-		return err
+	var envelope apiEnvelope
+	if err = json.NewDecoder(res.Body).Decode(&envelope); err != nil {
+		return fmt.Errorf("decode response: %w", err)
 	}
 
-	if v.Errors.Val != nil && v.Errors.Val.Requests != "" {
-		return fmt.Errorf("%w: %s", ErrRequestLimitReached, v.Errors.Val.Requests)
+	v.Get = envelope.Get
+	v.Parameters = envelope.Parameters
+	v.Errors = envelope.Errors
+	v.Results = envelope.Results
+	v.Paging = envelope.Paging
+
+	// The daily quota is reported before the payload is decoded, because the API
+	// pairs it with an empty "response" array on every endpoint.
+	if envelope.Errors.Val != nil && envelope.Errors.Val.Requests != "" {
+		return fmt.Errorf("%w: %s", ErrRequestLimitReached, envelope.Errors.Val.Requests)
+	}
+
+	if err = decodeResponsePayload(envelope.Response, &v.Response); err != nil {
+		return fmt.Errorf("decode response: %w", err)
 	}
 
 	// Rate limit headers are informational: a missing or non-numeric header leaves

@@ -114,6 +114,40 @@ func atoiOrZero(value string) int {
 	return parsed
 }
 
+// apiEnvelope mirrors APIResponse but keeps "response" raw, so that the errors
+// object can be inspected before the payload is bound to T. The daily quota
+// arrives as HTTP 200 with an errors object and an empty "response" array, which
+// does not decode into endpoints whose response is an object.
+type apiEnvelope struct {
+	Get        string          `json:"get"`
+	Parameters json.RawMessage `json:"parameters"`
+	Errors     APIErrors       `json:"errors"`
+	Results    int             `json:"results"`
+	Paging     Paging          `json:"paging"`
+	Response   json.RawMessage `json:"response"`
+}
+
+// decodeResponsePayload unmarshals the raw "response" value into dst. api-sports
+// returns an empty array instead of an object when there is no data, so dst is
+// left at its zero value rather than failing the call in that case.
+func decodeResponsePayload(raw json.RawMessage, dst any) error {
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 {
+		return nil
+	}
+
+	err := json.Unmarshal(trimmed, dst)
+	if err == nil {
+		return nil
+	}
+
+	if bytes.Equal(trimmed, []byte("[]")) {
+		return nil
+	}
+
+	return err
+}
+
 type APIResponse[T any] struct {
 	Get        string          `json:"get"`
 	Parameters json.RawMessage `json:"parameters"`

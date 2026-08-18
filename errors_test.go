@@ -272,3 +272,97 @@ func TestSendTypedRequest_IncludeHeadersNonNumeric(t *testing.T) {
 		require.Equal(t, 0, res.Headers.XRateLimitRemaining)
 	})
 }
+
+// TestSendTypedRequest_DailyLimitOnObjectEndpoints covers the endpoints whose
+// response is a JSON object. The API pairs the daily limit error with an empty
+// "response" array, which must not be mistaken for a decoding failure.
+func TestSendTypedRequest_DailyLimitOnObjectEndpoints(t *testing.T) {
+	const limitMessage = "You have reached the request limit for the day"
+	body := fmt.Sprintf(
+		`{"get":"status","parameters":[],"errors":{"requests":%q},"results":0,"paging":{"current":1,"total":1},"response":[]}`,
+		limitMessage,
+	)
+
+	tests := []struct {
+		name string
+		call func(client *Client) error
+	}{
+		{
+			name: "status",
+			call: func(client *Client) error {
+				_, err := client.GetStatus(context.Background())
+				return err
+			},
+		},
+		{
+			name: "team statistics",
+			call: func(client *Client) error {
+				_, err := client.GetTeamStatistics(context.Background(), &TeamStatisticsOption{
+					Team:   33,
+					Season: 2025,
+					League: 39,
+				})
+				return err
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			client := newStatusClient(t, &HandlerHelper{ResponseBody: body})
+
+			err := tt.call(client)
+			require.Error(t, err)
+			require.True(t, errors.Is(err, ErrRequestLimitReached))
+			require.Contains(t, err.Error(), limitMessage)
+		})
+	}
+}
+
+// TestSendTypedRequest_EmptyResponseOnObjectEndpoint checks that an empty payload
+// without any error yields the zero value instead of a decoding failure.
+func TestSendTypedRequest_EmptyResponseOnObjectEndpoint(t *testing.T) {
+	client := newStatusClient(t, &HandlerHelper{
+		ResponseBody: `{"get":"teams/statistics","parameters":{"team":"33"},"errors":[],"results":0,"paging":{"current":1,"total":1},"response":[]}`,
+	})
+
+	res, err := client.GetTeamStatistics(context.Background(), &TeamStatisticsOption{
+		Team:   33,
+		Season: 2025,
+		League: 39,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "teams/statistics", res.Get)
+	require.Equal(t, 0, res.Results)
+	require.Equal(t, TeamStatistics{}, res.Response)
+}
+
+// TestSendTypedRequest_EnvelopeIsPopulated guards the envelope fields that are now
+// copied by hand instead of being decoded straight into APIResponse.
+func TestSendTypedRequest_EnvelopeIsPopulated(t *testing.T) {
+	client := newStatusClient(t, &HandlerHelper{
+		ResponseBody: `{"get":"timezone","parameters":{"name":"Europe/London"},"errors":[],"results":2,"paging":{"current":1,"total":3},"response":["Europe/London","Europe/Madrid"]}`,
+	})
+
+	res, err := client.GetTimezone(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, "timezone", res.Get)
+	require.JSONEq(t, `{"name":"Europe/London"}`, string(res.Parameters))
+	require.Equal(t, 2, res.Results)
+	require.Equal(t, Paging{Current: 1, Total: 3}, res.Paging)
+	require.Nil(t, res.Errors.Val)
+	require.Equal(t, []string{"Europe/London", "Europe/Madrid"}, res.Response)
+}
+
+// TestSendTypedRequest_MalformedPayloadStillFails makes sure the empty-array
+// tolerance does not swallow genuinely broken payloads.
+func TestSendTypedRequest_MalformedPayloadStillFails(t *testing.T) {
+	client := newStatusClient(t, &HandlerHelper{
+		ResponseBody: `{"get":"status","parameters":[],"errors":[],"results":1,"paging":{"current":1,"total":1},"response":"not an object"}`,
+	})
+
+	_, err := client.GetStatus(context.Background())
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "decode response")
+}
