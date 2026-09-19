@@ -202,6 +202,32 @@ func (e *APIErrors) UnmarshalJSON(b []byte) error {
 	}
 }
 
+// decodeStringOrNumber decodes a JSON value the API sends either as a string or
+// as a bare number into a string. A round is named on most competitions
+// ("Regular Season - 14") but reported as a number on those whose rounds have no
+// name, and a number there used to fail the whole response with
+// "cannot unmarshal number into Go struct field ... of type string".
+// A null or a missing value yields an empty string.
+func decodeStringOrNumber(b []byte, dst *string) error {
+	s := bytes.TrimSpace(b)
+	if len(s) == 0 || bytes.Equal(s, []byte("null")) {
+		*dst = ""
+		return nil
+	}
+
+	if s[0] == '"' {
+		return json.Unmarshal(s, dst)
+	}
+
+	var num json.Number
+	if err := json.Unmarshal(s, &num); err != nil {
+		return fmt.Errorf("expected string or number, got %s", string(s))
+	}
+	*dst = num.String()
+
+	return nil
+}
+
 func (e *APIErrors) Error() error {
 	if e == nil || e.Val == nil {
 		return nil
@@ -293,6 +319,26 @@ type LeagueInfo struct {
 	Flag    string `json:"flag"`
 	Season  int    `json:"season"`
 	Round   string `json:"round"`
+}
+
+// UnmarshalJSON accepts a round reported either as a string or as a number, the
+// same way FixturesRounds does.
+func (l *LeagueInfo) UnmarshalJSON(b []byte) error {
+	type alias LeagueInfo
+	var raw struct {
+		alias
+		Round json.RawMessage `json:"round"`
+	}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+
+	*l = LeagueInfo(raw.alias)
+	if err := decodeStringOrNumber(raw.Round, &l.Round); err != nil {
+		return fmt.Errorf("round: %w", err)
+	}
+
+	return nil
 }
 
 type TeamsFixture struct {
