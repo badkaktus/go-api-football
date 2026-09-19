@@ -2,6 +2,7 @@ package gaf
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -116,6 +117,26 @@ type FixturesRoundsOptions struct {
 type FixturesRounds struct {
 	Round string   `json:"round"`
 	Dates []string `json:"dates"`
+}
+
+// UnmarshalJSON accepts a round reported either as a string or as a number.
+// Competitions whose rounds have no name are answered as {"round": 1}.
+func (r *FixturesRounds) UnmarshalJSON(b []byte) error {
+	type alias FixturesRounds
+	var raw struct {
+		alias
+		Round json.RawMessage `json:"round"`
+	}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+
+	*r = FixturesRounds(raw.alias)
+	if err := decodeStringOrNumber(raw.Round, &r.Round); err != nil {
+		return fmt.Errorf("round: %w", err)
+	}
+
+	return nil
 }
 
 func (c *Client) GetFixtures(ctx context.Context, options *FixturesOptions, opts ...CallOption) (*APIResponse[Fixtures], error) {

@@ -361,3 +361,70 @@ func TestGetFixturesFreePlanError(t *testing.T) {
 	require.Equal(t, 0, len(resp.Response))
 	require.Equal(t, "Free plans do not have access to this season, try from 2021 to 2023.", resp.Errors.Val.Plan)
 }
+
+func TestGetFixturesRounds(t *testing.T) {
+	server := httptest.NewServer(getHandler(t, &HandlerHelper{
+		ResponseBody: `{"get":"fixtures/rounds","parameters":{"league":"39","season":"2019","dates":"true"},"errors":[],"results":2,"paging":{"current":1,"total":1},"response":[{"round":"Regular Season - 1","dates":["2019-08-09","2019-08-10"]},{"round":"Regular Season - 2","dates":["2019-08-17"]}]}`,
+	}))
+	defer server.Close()
+
+	client := NewTestClientWithCustomHandler(t, server)
+
+	resp, err := client.GetFixturesRounds(context.Background(), &FixturesRoundsOptions{
+		League: 39,
+		Season: 2019,
+		Dates:  true,
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, 2, len(resp.Response))
+	require.Equal(t, "Regular Season - 1", resp.Response[0].Round)
+	require.Equal(t, []string{"2019-08-09", "2019-08-10"}, resp.Response[0].Dates)
+	require.Equal(t, "Regular Season - 2", resp.Response[1].Round)
+}
+
+// TestGetFixturesRoundsNumericRound covers competitions whose rounds have no
+// name: the API answers with {"round": 1} instead of a string.
+func TestGetFixturesRoundsNumericRound(t *testing.T) {
+	server := httptest.NewServer(getHandler(t, &HandlerHelper{
+		ResponseBody: `{"get":"fixtures/rounds","parameters":{"league":"5","season":"2026","dates":"true"},"errors":[],"results":2,"paging":{"current":1,"total":1},"response":[{"round":1,"dates":["2026-09-24","2026-09-25"]},{"round":2,"dates":["2026-09-27"]}]}`,
+	}))
+	defer server.Close()
+
+	client := NewTestClientWithCustomHandler(t, server)
+
+	resp, err := client.GetFixturesRounds(context.Background(), &FixturesRoundsOptions{
+		League: 5,
+		Season: 2026,
+		Dates:  true,
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, 2, len(resp.Response))
+	require.Equal(t, "1", resp.Response[0].Round)
+	require.Equal(t, []string{"2026-09-24", "2026-09-25"}, resp.Response[0].Dates)
+	require.Equal(t, "2", resp.Response[1].Round)
+}
+
+// TestGetFixturesNumericRound covers the same value on the fixtures endpoint,
+// where the round is reported inside the league block.
+func TestGetFixturesNumericRound(t *testing.T) {
+	server := httptest.NewServer(getHandler(t, &HandlerHelper{
+		ResponseBody: `{"get":"fixtures","parameters":{"league":"5","season":"2026"},"errors":[],"results":1,"paging":{"current":1,"total":1},"response":[{"fixture":{"id":239625,"referee":null,"timezone":"UTC","date":"2026-09-24T14:00:00+00:00","timestamp":1580997600,"periods":{"first":1580997600,"second":null},"venue":{"id":1887,"name":"Stade Municipal","city":"Oued Zem"},"status":{"long":"Not Started","short":"NS","elapsed":null,"extra":null}},"league":{"id":5,"name":"UEFA Nations League","country":"World","logo":"","flag":null,"season":2026,"round":1},"teams":{"home":{"id":967,"name":"Home","logo":"","winner":null},"away":{"id":968,"name":"Away","logo":"","winner":null}},"goals":{"home":null,"away":null},"score":{"halftime":{"home":null,"away":null},"fulltime":{"home":null,"away":null},"extratime":{"home":null,"away":null},"penalty":{"home":null,"away":null}}}]}`,
+	}))
+	defer server.Close()
+
+	client := NewTestClientWithCustomHandler(t, server)
+
+	resp, err := client.GetFixtures(context.Background(), &FixturesOptions{
+		League: 5,
+		Season: 2026,
+	})
+	require.NoError(t, err)
+
+	require.Equal(t, 1, len(resp.Response))
+	require.Equal(t, 5, resp.Response[0].League.ID)
+	require.Equal(t, "UEFA Nations League", resp.Response[0].League.Name)
+	require.Equal(t, 2026, resp.Response[0].League.Season)
+	require.Equal(t, "1", resp.Response[0].League.Round)
+}
