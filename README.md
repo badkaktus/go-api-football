@@ -97,6 +97,7 @@ Not all endpoints have been added to the client at the moment.
 | Fixtures events             | `/fixtures/events`     | GetFixturesEvents     | FixturesEventsOptions          |
 | Fixtures lineups            | `/fixtures/lineups`    | GetFixturesLineups    | FixturesLineupsOptions         |
 | Fixtures players statistics | `/fixtures/players`    | GetFixturesPlayers    | FixturesPlayersOptions         |
+| Players profiles            | `/players/profiles`    | GetPlayersProfiles    | PlayersProfilesOptions         |
 | Predictions                 | `/predictions`         | GetPredictions        | PredictionsOptions             |
 | Coachs                      | `/coachs`              | GetCoachs             | CoachsOptions                  |
 | Transfers                   | `/transfers`           | GetTransfers          | TransfersOptions               |
